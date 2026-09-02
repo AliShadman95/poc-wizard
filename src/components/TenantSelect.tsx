@@ -1,8 +1,8 @@
-import { TENANTS, type Tenant } from '../domain/types';
+import { TENANTS, type Tenant } from '../domain';
 
 /**
- * A demo instrument, not a product feature: it sits outside the Wizard and changing
- * the Tenant clears the Draft, because the two markets' Fields do not coincide.
+ * Strumento di demo, non funzionalità di prodotto: sta fuori dal wizard e cambiare
+ * tenant azzera la bozza, perché i campi dei due mercati non coincidono.
  */
 export function TenantSelect({ tenant, onChange }: { tenant: Tenant; onChange: (t: Tenant) => void }) {
   return (

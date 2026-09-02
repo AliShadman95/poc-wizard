@@ -1,4 +1,14 @@
+---
+status: superseded by ADR-0008
+---
+
 # Per-Tenant composition through Section Variants
+
+> **Superseded.** The descriptor-driven model this records was replaced by explicit,
+> duplicated schemas and components. See
+> [ADR 0008](./0008-explicit-duplication-over-descriptors.md) for why. Kept because the
+> reasoning below is still the honest account of what the abstraction bought, and of
+> what was knowingly given up when it was removed.
 
 Differences between Tenants are expressed as Variants of Sections — which Fields exist,
 what format they accept, what labels they carry — plus the list of Sections enabled for

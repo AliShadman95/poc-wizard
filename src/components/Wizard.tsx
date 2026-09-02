@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { Navigate, Route, Routes, useNavigate, useParams } from 'react-router-dom';
-import type { Draft, StepId, StepValues, Tenant } from '../domain/types';
-import { isStepId, pathForStep, wizardFor } from '../wizard/config';
-import { buildPayload, serialize } from '../wizard/payload';
-import { StepForm } from './StepForm';
+import { STEPS, isStepId, pathForStep, stepIndex, type Draft, type StepId, type StepValues, type Tenant } from '../domain';
+import { buildPayload, serialize } from '../payload';
+import { FeaturesStep } from '../steps/features/FeaturesStep';
+import { MultimediaStep } from '../steps/multimedia/MultimediaStep';
+import { PublicationStep } from '../steps/publication/PublicationStep';
 import { TenantSelect } from './TenantSelect';
 
 export function Wizard() {
@@ -11,13 +12,12 @@ export function Wizard() {
   const [draft, setDraft] = useState<Draft>({});
   const [published, setPublished] = useState<string | null>(null);
   const navigate = useNavigate();
-  const steps = wizardFor(tenant);
 
   const changeTenant = (next: Tenant) => {
     setTenant(next);
     setDraft({});
     setPublished(null);
-    navigate(pathForStep(steps[0].id), { replace: true });
+    navigate(pathForStep(STEPS[0].id), { replace: true });
   };
 
   return (
@@ -25,7 +25,7 @@ export function Wizard() {
       <h1>Inserimento annuncio</h1>
       <TenantSelect tenant={tenant} onChange={changeTenant} />
       <Routes>
-        <Route path="/" element={<Navigate to={pathForStep(steps[0].id)} replace />} />
+        <Route path="/" element={<Navigate to={pathForStep(STEPS[0].id)} replace />} />
         <Route
           path="/listing/:stepId"
           element={
@@ -47,7 +47,7 @@ export function Wizard() {
 interface StepRouteProps {
   tenant: Tenant;
   draft: Draft;
-  setDraft: React.Dispatch<React.SetStateAction<Draft>>;
+  setDraft: (d: Draft) => void;
   published: string | null;
   setPublished: (v: string | null) => void;
 }
@@ -55,30 +55,25 @@ interface StepRouteProps {
 function StepRoute({ tenant, draft, setDraft, published, setPublished }: StepRouteProps) {
   const { stepId } = useParams();
   const navigate = useNavigate();
-  const steps = wizardFor(tenant);
 
   if (!isStepId(stepId)) return <Navigate to="/" replace />;
-  const step = steps.find((s) => s.id === stepId)!;
 
   /**
-   * With no persistence (this PoC saves no draft), a refresh on a later Step would
-   * land on an empty form disconnected from the preceding ones. Go back to the first Step.
+   * Senza persistenza, un refresh su uno Step successivo atterrerebbe su un form vuoto
+   * scollegato dai precedenti. Si torna al primo Step.
    */
-  const previous = steps[step.index - 1];
-  if (previous && !draft[previous.id]) return <Navigate to={pathForStep(steps[0].id)} replace />;
+  const index = stepIndex(stepId);
+  const previous = STEPS[index - 1];
+  if (previous && !draft[previous.id]) return <Navigate to={pathForStep(STEPS[0].id)} replace />;
 
-  /**
-   * Committing on the way out — forwards or backwards — is what makes the Draft hold
-   * what the user last typed. It therefore records what has been VISITED, not what is
-   * valid: validity is re-established on every forward move. See ADR 0006.
-   */
+  /** Si committa uscendo, avanti o indietro, così le modifiche non si perdono. */
   const onGo = (values: StepValues, target: StepId) => {
-    setDraft({ ...draft, [step.id]: values });
+    setDraft({ ...draft, [stepId]: values });
     navigate(pathForStep(target));
   };
 
   const onPublish = (values: StepValues) => {
-    const updated: Draft = { ...draft, [step.id]: values };
+    const updated: Draft = { ...draft, [stepId]: values };
     setDraft(updated);
     setPublished(serialize(buildPayload(tenant, updated)));
   };
@@ -93,15 +88,8 @@ function StepRoute({ tenant, draft, setDraft, published, setPublished }: StepRou
     );
   }
 
-  return (
-    <StepForm
-      tenant={tenant}
-      step={step}
-      steps={steps}
-      draft={draft}
-      saved={draft[step.id]}
-      onGo={onGo}
-      onPublish={onPublish}
-    />
-  );
+  const props = { tenant, draft, onGo, onPublish };
+  if (stepId === 'multimedia') return <MultimediaStep {...props} />;
+  if (stepId === 'features') return <FeaturesStep {...props} />;
+  return <PublicationStep {...props} />;
 }

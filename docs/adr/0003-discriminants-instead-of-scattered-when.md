@@ -1,4 +1,14 @@
+---
+status: superseded by ADR-0008
+---
+
 # Conditional Fields modelled as sets keyed by Discriminant value
+
+> **Superseded.** The descriptor-driven model this records was replaced by explicit,
+> duplicated schemas and components. See
+> [ADR 0008](./0008-explicit-duplication-over-descriptors.md) for why. Kept because the
+> reasoning below is still the honest account of what the abstraction bought, and of
+> what was knowingly given up when it was removed.
 
 Where a Field determines the existence of other Fields, the Variant's descriptor explicitly
 declares, for each admissible value of that Field, the set of Fields that depend on it. This
