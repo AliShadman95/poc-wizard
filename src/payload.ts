@@ -1,6 +1,5 @@
 import type { Draft, Tenant } from './domain';
-import { featuresSchemaES } from './steps/features/schema.es';
-import { featuresSchemaIT } from './steps/features/schema.it';
+import { getFeaturesSchema } from './steps/features/schema';
 import { multimediaSchema } from './steps/multimedia/schema';
 import { publicationSchema } from './steps/publication/schema';
 
@@ -11,7 +10,7 @@ import { publicationSchema } from './steps/publication/schema';
  * non ci finiscono. Fare lo spread diretto della bozza li lascerebbe passare.
  */
 export function buildPayload(tenant: Tenant, draft: Draft) {
-  const features = tenant === 'IT' ? featuresSchemaIT : featuresSchemaES;
+  const features = getFeaturesSchema(tenant);
   const featureValues = draft.features ?? {};
 
   return {

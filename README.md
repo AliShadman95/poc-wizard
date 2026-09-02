@@ -33,6 +33,7 @@ src/
     features/
       schema.it.ts              every Italian rule, in full
       schema.es.ts              every Spanish rule, in full — a duplicate on purpose
+      schema.ts                 the one exhaustive switch from tenant to schema
       FeaturesStep.tsx          which sections appear, and when
       sections/
         MainDetails.tsx         the Categoria -> Gruppo -> Tipologia cascade
@@ -95,8 +96,10 @@ Spreading the Draft directly would emit numbers as strings and keep the leftover
 
 ## Known limitations, all deliberate
 
-- Adding a market means editing each schema copy, and nothing will fail the build if one is
-  missed. That is the accepted cost of ADR 0008.
+- Adding a market means writing its schema out in full, and nothing checks that every field
+  was carried over — the accepted cost of ADR 0008. The build does break at
+  `steps/features/schema.ts`, whose exhaustive `switch` will not compile until the new
+  tenant is wired up, so you are at least told where to start.
 - The classification cascade is data in `propertyClassification.ts`, shared by both markets
   because nothing says they differ. If one day they do, that file gets duplicated per tenant
   the way the schemas already are.

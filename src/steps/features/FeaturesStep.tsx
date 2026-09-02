@@ -8,8 +8,7 @@ import { LandRegistry } from './sections/LandRegistry';
 import { MainDetails } from './sections/MainDetails';
 import { RentTerms } from './sections/RentTerms';
 import { SalePrice } from './sections/SalePrice';
-import { featuresInitialValuesES, featuresSchemaES } from './schema.es';
-import { featuresInitialValuesIT, featuresSchemaIT } from './schema.it';
+import { getFeaturesInitialValues, getFeaturesSchema } from './schema';
 
 interface Props {
   tenant: Tenant;
@@ -24,8 +23,8 @@ export function FeaturesStep({ tenant, draft, onGo, onPublish }: Props) {
       stepId="features"
       tenant={tenant}
       draft={draft}
-      initialValues={tenant === 'IT' ? featuresInitialValuesIT : featuresInitialValuesES}
-      buildSchema={tenant === 'IT' ? featuresSchemaIT : featuresSchemaES}
+      initialValues={getFeaturesInitialValues(tenant)}
+      buildSchema={getFeaturesSchema(tenant)}
       onGo={onGo}
       onPublish={onPublish}
     >

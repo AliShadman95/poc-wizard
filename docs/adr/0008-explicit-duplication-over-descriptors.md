@@ -17,9 +17,12 @@ than the duplication it removed.
 ## Consequences
 
 - **What is given up, deliberately**: total maps no longer make an omission a compile
-  error. Adding a fourth property type or a third market means remembering to touch each
-  copy, and nothing will fail the build if one is missed. This is the price of the change,
-  accepted knowingly.
+  error *inside* a schema. Adding a market means writing its schema out in full, and nothing
+  checks that every field was carried over. This is the price of the change, accepted knowingly.
+- Partially recovered, at the seam: the tenant is resolved to a schema by an exhaustive
+  `switch` with a declared return type in `steps/features/schema.ts`. Adding a tenant to the
+  union therefore does break the build — verified — pointing at the one file that has to
+  choose. It catches "you forgot to wire the new market up", not "you forgot a field in it".
 - Reading `FeaturesStep.tsx` shows every section that can appear and the condition for
   each; reading `schema.it.ts` shows every rule for Italy. The two files are meant to be
   kept in the same order, since the error summary follows the schema.
