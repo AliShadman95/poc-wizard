@@ -65,12 +65,28 @@ export function TextareaInput(props: Base) {
   );
 }
 
-export function SelectInput(props: Base & { options: { value: string; label: string }[] }) {
+/**
+ * `onValueChange` esiste per un caso solo: una select che ne azzera un'altra a valle,
+ * come Categoria → Gruppo → Tipologia. Il reset resta scritto nella sezione che lo
+ * riguarda, non qui dentro.
+ */
+export function SelectInput(
+  props: Base & { options: { value: string; label: string }[]; onValueChange?: (value: string) => void },
+) {
   const [field] = useField(`${props.section}.${props.name}`);
   return (
     <Wrapper {...props}>
       {(id, invalid) => (
-        <select {...field} id={id} value={(field.value as string) ?? ''} aria-invalid={invalid}>
+        <select
+          {...field}
+          id={id}
+          value={(field.value as string) ?? ''}
+          aria-invalid={invalid}
+          onChange={(e) => {
+            field.onChange(e);
+            props.onValueChange?.(e.target.value);
+          }}
+        >
           <option value="">— seleziona —</option>
           {props.options.map((o) => (
             <option key={o.value} value={o.value}>

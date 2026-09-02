@@ -3,11 +3,11 @@ import type { Draft, StepId, StepValues, Tenant } from '../../domain';
 import { StepShell } from '../../components/StepShell';
 import { AddressES } from './sections/AddressES';
 import { AddressIT } from './sections/AddressIT';
-import { ContractAndPriceApartment } from './sections/ContractAndPriceApartment';
-import { ContractAndPriceOffice } from './sections/ContractAndPriceOffice';
-import { ContractAndPriceVilla } from './sections/ContractAndPriceVilla';
+import { Contract } from './sections/Contract';
 import { LandRegistry } from './sections/LandRegistry';
 import { MainDetails } from './sections/MainDetails';
+import { RentTerms } from './sections/RentTerms';
+import { SalePrice } from './sections/SalePrice';
 import { featuresInitialValuesES, featuresSchemaES } from './schema.es';
 import { featuresInitialValuesIT, featuresSchemaIT } from './schema.it';
 
@@ -41,7 +41,7 @@ export function FeaturesStep({ tenant, draft, onGo, onPublish }: Props) {
  */
 function Sections({ tenant }: { tenant: Tenant }) {
   const { values } = useFormikContext<StepValues>();
-  const propertyType = values.mainDetails?.propertyType;
+  const contractType = values.contract?.contractType;
 
   return (
     <>
@@ -49,9 +49,9 @@ function Sections({ tenant }: { tenant: Tenant }) {
 
       {tenant === 'IT' ? <AddressIT /> : <AddressES />}
 
-      {propertyType === 'apartment' && <ContractAndPriceApartment tenant={tenant} />}
-      {propertyType === 'villa' && <ContractAndPriceVilla tenant={tenant} />}
-      {propertyType === 'office' && <ContractAndPriceOffice tenant={tenant} />}
+      <Contract tenant={tenant} />
+      {contractType === 'sale' && <SalePrice />}
+      {contractType === 'rent' && <RentTerms />}
 
       {tenant === 'IT' && <LandRegistry />}
     </>

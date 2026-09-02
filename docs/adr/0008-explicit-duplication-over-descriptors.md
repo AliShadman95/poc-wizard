@@ -4,8 +4,8 @@ Sections, fields, per-tenant variants and conditional relationships were previou
 declared as descriptor objects — total maps keyed by a discriminating value, per-tenant
 overrides, and a normalisation pass reconciling values after every change. That model is
 gone. Each market now has its own validation schema written out in full, and each variant
-of a section is its own component named after the case it handles:
-`ContractAndPriceApartment`, `ContractAndPriceVilla`, `ContractAndPriceOffice`.
+of a section is its own component named after the case it handles: `AddressIT` and
+`AddressES` for the two markets, `SalePrice` and `RentTerms` for the two contract types.
 
 The reason is legibility, and it came from using the thing. Every individual piece of the
 descriptor model was defensible, and together they bought real compile-time exhaustiveness.
@@ -28,9 +28,10 @@ than the duplication it removed.
   no single place to live.
 - Conditional cleanup is no longer automatic. Values from a branch the user left behind
   stay in form state and are removed at the boundary instead, by `cast(..., { stripUnknown:
-  true })` in `buildPayload`. The one case where a stale value would be visible on screen —
-  arriving at an office with "rent" selected — is handled by three explicit lines in
-  `ContractAndPriceOffice`, where a reader will look for it.
+  true })` in `buildPayload`: switching from rent to sale leaves the rent figures in state,
+  and they simply never reach the payload. The one place a stale value would be visible on
+  screen is the Classification cascade, where changing a level explicitly clears the levels
+  below it, in `MainDetails` where a reader will look for it.
 - Field labels are written twice: once in the JSX and once as `.label()` in the schema,
   which feeds the error summary. A mismatch shows a different label in the summary than on
   the field; it cannot cause a validation bug.

@@ -1,6 +1,6 @@
 import * as Yup from 'yup';
 import type { AnyObjectSchema } from 'yup';
-import type { ContractType, PropertyType, StepValues } from '../../domain';
+import type { ContractType, StepValues } from '../../domain';
 
 /**
  * Lo schema del mercato SPAGNOLO, scritto per esteso.
@@ -20,8 +20,14 @@ const number = () =>
 
 const text = () => Yup.string().trim();
 
+/**
+ * Categoria, gruppo e tipologia sono una cascata gestita nella UI: qui basta esigerne
+ * la presenza, perché le select non possono offrire una combinazione incoerente.
+ */
 const mainDetails = () =>
   Yup.object({
+    category: text().required(REQUIRED).label('Categoria'),
+    group: text().required(REQUIRED).label('Gruppo'),
     propertyType: text().required(REQUIRED).label('Tipologia'),
     areaSqm: number().positive('Deve essere maggiore di zero').required(REQUIRED).label('Superficie (m²)'),
     rooms: number().integer('Deve essere un numero intero').min(1, 'Almeno 1').required(REQUIRED).label('Numero di locali'),
@@ -40,107 +46,49 @@ const address = () =>
       .label('Código postal'),
   }).label('Indirizzo');
 
-const nif = () =>
-  text()
-    .matches(/^\d{8}[A-Za-z]$/, 'Il NIF è composto da 8 cifre seguite da una lettera')
-    .required(REQUIRED)
-    .label('NIF del proprietario');
-
-// --- Contratto e prezzo, una funzione per tipologia -------------------------------
-
-function contractAndPriceApartment(contractType: ContractType | '') {
-  if (contractType === 'rent') {
-    return Yup.object({
-      contractType: text().required(REQUIRED).label('Tipo di contratto'),
-      monthlyRent: number().positive('Deve essere maggiore di zero').required(REQUIRED).label('Canone mensile (€)'),
-      serviceCharges: number().min(0, 'Non può essere negativo').label('Spese condominiali mensili (€)'),
-      depositMonths: number().integer('Deve essere un numero intero').min(0, 'Non può essere negativo').required(REQUIRED).label('Mesi di cauzione'),
-      nif: nif(),
-    }).label('Contratto e prezzo');
-  }
-  if (contractType === 'sale') {
-    return Yup.object({
-      contractType: text().required(REQUIRED).label('Tipo di contratto'),
-      salePrice: number().positive('Deve essere maggiore di zero').required(REQUIRED).label('Prezzo di vendita (€)'),
-      notaryFees: number().min(0, 'Non può essere negativo').label('Spese notarili stimate (€)'),
-      nif: nif(),
-    }).label('Contratto e prezzo');
-  }
-  return Yup.object({
+const contract = () =>
+  Yup.object({
     contractType: text().required(REQUIRED).label('Tipo di contratto'),
-    nif: nif(),
-  }).label('Contratto e prezzo');
-}
+    nif: text()
+      .matches(/^\d{8}[A-Za-z]$/, 'Il NIF è composto da 8 cifre seguite da una lettera')
+      .required(REQUIRED)
+      .label('NIF del proprietario'),
+  }).label('Contratto');
 
-function contractAndPriceVilla(contractType: ContractType | '') {
-  if (contractType === 'rent') {
-    return Yup.object({
-      contractType: text().required(REQUIRED).label('Tipo di contratto'),
-      monthlyRent: number().positive('Deve essere maggiore di zero').required(REQUIRED).label('Canone mensile (€)'),
-      serviceCharges: number().min(0, 'Non può essere negativo').label('Spese di manutenzione mensili (€)'),
-      depositMonths: number().integer('Deve essere un numero intero').min(0, 'Non può essere negativo').required(REQUIRED).label('Mesi di cauzione'),
-      nif: nif(),
-    }).label('Contratto e prezzo');
-  }
-  if (contractType === 'sale') {
-    return Yup.object({
-      contractType: text().required(REQUIRED).label('Tipo di contratto'),
-      salePrice: number().positive('Deve essere maggiore di zero').required(REQUIRED).label('Prezzo di vendita (€)'),
-      notaryFees: number().min(0, 'Non può essere negativo').label('Spese notarili stimate (€)'),
-      nif: nif(),
-    }).label('Contratto e prezzo');
-  }
-  return Yup.object({
-    contractType: text().required(REQUIRED).label('Tipo di contratto'),
-    nif: nif(),
-  }).label('Contratto e prezzo');
-}
+/** Solo per la vendita. */
+const price = () =>
+  Yup.object({
+    salePrice: number().positive('Deve essere maggiore di zero').required(REQUIRED).label('Prezzo di vendita (€)'),
+    notaryFees: number().min(0, 'Non può essere negativo').label('Spese notarili stimate (€)'),
+  }).label('Prezzo');
 
-/** Un ufficio si può solo vendere, e richiede la licenza commerciale. */
-function contractAndPriceOffice(contractType: ContractType | '') {
-  if (contractType === 'sale') {
-    return Yup.object({
-      contractType: text().oneOf(['sale'], 'Un ufficio si può solo vendere').required(REQUIRED).label('Tipo di contratto'),
-      salePrice: number().positive('Deve essere maggiore di zero').required(REQUIRED).label('Prezzo di vendita (€)'),
-      notaryFees: number().min(0, 'Non può essere negativo').label('Spese notarili stimate (€)'),
-      businessLicence: text().matches(/^[A-Za-z0-9/-]{4,20}$/, 'Da 4 a 20 caratteri alfanumerici').required(REQUIRED).label('Numero di licenza commerciale'),
-      nif: nif(),
-    }).label('Contratto e prezzo');
-  }
-  return Yup.object({
-    contractType: text().oneOf(['sale'], 'Un ufficio si può solo vendere').required(REQUIRED).label('Tipo di contratto'),
-    businessLicence: text().matches(/^[A-Za-z0-9/-]{4,20}$/, 'Da 4 a 20 caratteri alfanumerici').required(REQUIRED).label('Numero di licenza commerciale'),
-    nif: nif(),
-  }).label('Contratto e prezzo');
-}
+/** Solo per l'affitto. */
+const rentTerms = () =>
+  Yup.object({
+    monthlyRent: number().positive('Deve essere maggiore di zero').required(REQUIRED).label('Canone mensile (€)'),
+    serviceCharges: number().min(0, 'Non può essere negativo').label('Spese condominiali mensili (€)'),
+    depositMonths: number().integer('Deve essere un numero intero').min(0, 'Non può essere negativo').required(REQUIRED).label('Mesi di cauzione'),
+  }).label('Canone e condizioni');
 
 /** Nessuna sezione Dati catastali: è la differenza di forma rispetto all'Italia. */
 export function featuresSchemaES(values: StepValues): AnyObjectSchema {
-  const propertyType = (values.mainDetails?.propertyType ?? '') as PropertyType | '';
-  const contractType = (values.contractAndPrice?.contractType ?? '') as ContractType | '';
+  const contractType = (values.contract?.contractType ?? '') as ContractType | '';
 
   const shape: Record<string, AnyObjectSchema> = {
     mainDetails: mainDetails(),
     address: address(),
+    contract: contract(),
   };
-  if (propertyType === 'apartment') shape.contractAndPrice = contractAndPriceApartment(contractType);
-  if (propertyType === 'villa') shape.contractAndPrice = contractAndPriceVilla(contractType);
-  if (propertyType === 'office') shape.contractAndPrice = contractAndPriceOffice(contractType);
+  if (contractType === 'sale') shape.price = price();
+  if (contractType === 'rent') shape.rentTerms = rentTerms();
 
   return Yup.object(shape);
 }
 
 export const featuresInitialValuesES: StepValues = {
-  mainDetails: { propertyType: '', areaSqm: '', rooms: '', bathrooms: '' },
+  mainDetails: { category: '', group: '', propertyType: '', areaSqm: '', rooms: '', bathrooms: '' },
   address: { street: '', streetNumber: '', city: '', postalCode: '' },
-  contractAndPrice: {
-    contractType: '',
-    salePrice: '',
-    notaryFees: '',
-    monthlyRent: '',
-    serviceCharges: '',
-    depositMonths: '',
-    businessLicence: '',
-    nif: '',
-  },
+  contract: { contractType: '', nif: '' },
+  price: { salePrice: '', notaryFees: '' },
+  rentTerms: { monthlyRent: '', serviceCharges: '', depositMonths: '' },
 };

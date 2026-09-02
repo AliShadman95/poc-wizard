@@ -1,6 +1,6 @@
 import * as Yup from 'yup';
 import type { AnyObjectSchema } from 'yup';
-import type { ContractType, PropertyType, StepValues } from '../../domain';
+import type { ContractType, StepValues } from '../../domain';
 
 /**
  * Lo schema del mercato ITALIANO, scritto per esteso.
@@ -22,8 +22,14 @@ const number = () =>
 
 const text = () => Yup.string().trim();
 
+/**
+ * Categoria, gruppo e tipologia sono una cascata gestita nella UI: qui basta esigerne
+ * la presenza, perché le select non possono offrire una combinazione incoerente.
+ */
 const mainDetails = () =>
   Yup.object({
+    category: text().required(REQUIRED).label('Categoria'),
+    group: text().required(REQUIRED).label('Gruppo'),
     propertyType: text().required(REQUIRED).label('Tipologia'),
     areaSqm: number().positive('Deve essere maggiore di zero').required(REQUIRED).label('Superficie (m²)'),
     rooms: number().integer('Deve essere un numero intero').min(1, 'Almeno 1').required(REQUIRED).label('Numero di locali'),
@@ -39,6 +45,30 @@ const address = () =>
     postalCode: text().matches(/^\d{5}$/, 'Il CAP deve essere di 5 cifre').required(REQUIRED).label('CAP'),
   }).label('Indirizzo');
 
+const contract = () =>
+  Yup.object({
+    contractType: text().required(REQUIRED).label('Tipo di contratto'),
+    codiceFiscale: text()
+      .matches(/^[A-Za-z0-9]{16}$/, 'Il codice fiscale è di 16 caratteri alfanumerici')
+      .required(REQUIRED)
+      .label('Codice fiscale del proprietario'),
+  }).label('Contratto');
+
+/** Solo per la vendita. */
+const price = () =>
+  Yup.object({
+    salePrice: number().positive('Deve essere maggiore di zero').required(REQUIRED).label('Prezzo di vendita (€)'),
+    notaryFees: number().min(0, 'Non può essere negativo').label('Spese notarili stimate (€)'),
+  }).label('Prezzo');
+
+/** Solo per l'affitto. */
+const rentTerms = () =>
+  Yup.object({
+    monthlyRent: number().positive('Deve essere maggiore di zero').required(REQUIRED).label('Canone mensile (€)'),
+    serviceCharges: number().min(0, 'Non può essere negativo').label('Spese condominiali mensili (€)'),
+    depositMonths: number().integer('Deve essere un numero intero').min(0, 'Non può essere negativo').required(REQUIRED).label('Mesi di cauzione'),
+  }).label('Canone e condizioni');
+
 /** Sezione che esiste solo in Italia. */
 const landRegistry = () =>
   Yup.object({
@@ -47,113 +77,27 @@ const landRegistry = () =>
     subUnit: text().matches(/^\d{0,4}$/, 'Da 1 a 4 cifre').label('Subalterno'),
   }).label('Dati catastali');
 
-const codiceFiscale = () =>
-  text()
-    .matches(/^[A-Za-z0-9]{16}$/, 'Il codice fiscale è di 16 caratteri alfanumerici')
-    .required(REQUIRED)
-    .label('Codice fiscale del proprietario');
-
-// --- Contratto e prezzo, una funzione per tipologia -------------------------------
-
-function contractAndPriceApartment(contractType: ContractType | '') {
-  if (contractType === 'rent') {
-    return Yup.object({
-      contractType: text().required(REQUIRED).label('Tipo di contratto'),
-      monthlyRent: number().positive('Deve essere maggiore di zero').required(REQUIRED).label('Canone mensile (€)'),
-      serviceCharges: number().min(0, 'Non può essere negativo').label('Spese condominiali mensili (€)'),
-      depositMonths: number().integer('Deve essere un numero intero').min(0, 'Non può essere negativo').required(REQUIRED).label('Mesi di cauzione'),
-      codiceFiscale: codiceFiscale(),
-    }).label('Contratto e prezzo');
-  }
-  if (contractType === 'sale') {
-    return Yup.object({
-      contractType: text().required(REQUIRED).label('Tipo di contratto'),
-      salePrice: number().positive('Deve essere maggiore di zero').required(REQUIRED).label('Prezzo di vendita (€)'),
-      notaryFees: number().min(0, 'Non può essere negativo').label('Spese notarili stimate (€)'),
-      codiceFiscale: codiceFiscale(),
-    }).label('Contratto e prezzo');
-  }
-  return Yup.object({
-    contractType: text().required(REQUIRED).label('Tipo di contratto'),
-    codiceFiscale: codiceFiscale(),
-  }).label('Contratto e prezzo');
-}
-
-function contractAndPriceVilla(contractType: ContractType | '') {
-  if (contractType === 'rent') {
-    return Yup.object({
-      contractType: text().required(REQUIRED).label('Tipo di contratto'),
-      monthlyRent: number().positive('Deve essere maggiore di zero').required(REQUIRED).label('Canone mensile (€)'),
-      serviceCharges: number().min(0, 'Non può essere negativo').label('Spese di manutenzione mensili (€)'),
-      depositMonths: number().integer('Deve essere un numero intero').min(0, 'Non può essere negativo').required(REQUIRED).label('Mesi di cauzione'),
-      codiceFiscale: codiceFiscale(),
-    }).label('Contratto e prezzo');
-  }
-  if (contractType === 'sale') {
-    return Yup.object({
-      contractType: text().required(REQUIRED).label('Tipo di contratto'),
-      salePrice: number().positive('Deve essere maggiore di zero').required(REQUIRED).label('Prezzo di vendita (€)'),
-      notaryFees: number().min(0, 'Non può essere negativo').label('Spese notarili stimate (€)'),
-      codiceFiscale: codiceFiscale(),
-    }).label('Contratto e prezzo');
-  }
-  return Yup.object({
-    contractType: text().required(REQUIRED).label('Tipo di contratto'),
-    codiceFiscale: codiceFiscale(),
-  }).label('Contratto e prezzo');
-}
-
-/** Un ufficio si può solo vendere, e richiede la licenza commerciale. */
-function contractAndPriceOffice(contractType: ContractType | '') {
-  if (contractType === 'sale') {
-    return Yup.object({
-      contractType: text().oneOf(['sale'], 'Un ufficio si può solo vendere').required(REQUIRED).label('Tipo di contratto'),
-      salePrice: number().positive('Deve essere maggiore di zero').required(REQUIRED).label('Prezzo di vendita (€)'),
-      notaryFees: number().min(0, 'Non può essere negativo').label('Spese notarili stimate (€)'),
-      businessLicence: text().matches(/^[A-Za-z0-9/-]{4,20}$/, 'Da 4 a 20 caratteri alfanumerici').required(REQUIRED).label('Numero di licenza commerciale'),
-      codiceFiscale: codiceFiscale(),
-    }).label('Contratto e prezzo');
-  }
-  return Yup.object({
-    contractType: text().oneOf(['sale'], 'Un ufficio si può solo vendere').required(REQUIRED).label('Tipo di contratto'),
-    businessLicence: text().matches(/^[A-Za-z0-9/-]{4,20}$/, 'Da 4 a 20 caratteri alfanumerici').required(REQUIRED).label('Numero di licenza commerciale'),
-    codiceFiscale: codiceFiscale(),
-  }).label('Contratto e prezzo');
-}
-
-/**
- * Le sezioni sono aggiunte nello stesso ordine in cui FeaturesStep le renderizza.
- * Se non è ancora stata scelta una tipologia, la sezione Contratto e prezzo non è
- * a schermo e quindi non è nemmeno nello schema.
- */
+/** Le sezioni sono aggiunte nello stesso ordine in cui FeaturesStep le renderizza. */
 export function featuresSchemaIT(values: StepValues): AnyObjectSchema {
-  const propertyType = (values.mainDetails?.propertyType ?? '') as PropertyType | '';
-  const contractType = (values.contractAndPrice?.contractType ?? '') as ContractType | '';
+  const contractType = (values.contract?.contractType ?? '') as ContractType | '';
 
   const shape: Record<string, AnyObjectSchema> = {
     mainDetails: mainDetails(),
     address: address(),
+    contract: contract(),
   };
-  if (propertyType === 'apartment') shape.contractAndPrice = contractAndPriceApartment(contractType);
-  if (propertyType === 'villa') shape.contractAndPrice = contractAndPriceVilla(contractType);
-  if (propertyType === 'office') shape.contractAndPrice = contractAndPriceOffice(contractType);
+  if (contractType === 'sale') shape.price = price();
+  if (contractType === 'rent') shape.rentTerms = rentTerms();
   shape.landRegistry = landRegistry();
 
   return Yup.object(shape);
 }
 
 export const featuresInitialValuesIT: StepValues = {
-  mainDetails: { propertyType: '', areaSqm: '', rooms: '', bathrooms: '' },
+  mainDetails: { category: '', group: '', propertyType: '', areaSqm: '', rooms: '', bathrooms: '' },
   address: { street: '', streetNumber: '', city: '', postalCode: '' },
-  contractAndPrice: {
-    contractType: '',
-    salePrice: '',
-    notaryFees: '',
-    monthlyRent: '',
-    serviceCharges: '',
-    depositMonths: '',
-    businessLicence: '',
-    codiceFiscale: '',
-  },
+  contract: { contractType: '', codiceFiscale: '' },
+  price: { salePrice: '', notaryFees: '' },
+  rentTerms: { monthlyRent: '', serviceCharges: '', depositMonths: '' },
   landRegistry: { sheet: '', parcel: '', subUnit: '' },
 };

@@ -10,7 +10,6 @@ export const STEPS: { id: StepId; title: string }[] = [
   { id: 'publication', title: 'Pubblicazione' },
 ];
 
-export type PropertyType = 'apartment' | 'villa' | 'office';
 export type ContractType = 'sale' | 'rent';
 
 /** Values of one Step, keyed by section then by field. */

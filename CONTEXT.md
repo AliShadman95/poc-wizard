@@ -23,9 +23,9 @@ _Avoid_: Page, tab, stage, phase
 
 **Section**:
 A cohesive, named group of Fields within a Step, with its own domain identity (Photos,
-Main details, Address, Contract and price, Land registry, Visibility). A Section's Step is
-invariant with respect to the Tenant: what varies is whether the Section is present and
-which of its versions is shown, never where it sits.
+Main details, Address, Contract, Price, Rent terms, Land registry, Visibility). A Section's
+Step is invariant with respect to the Tenant: what varies is whether the Section is present,
+never where it sits.
 _Avoid_: Card, block, form, fieldset, panel
 
 **Tenant**:
@@ -39,14 +39,17 @@ The individual piece of data requested from the user within a Section, identifie
 path of the form `section.field` so that an Error summary can jump to it.
 _Avoid_: Input, control
 
-**Property type**:
-What is being listed — an apartment, a villa or an office. It decides which version of the
-Contract and price Section is shown, and each version is a separate component named after it.
-_Avoid_: Category, kind, typology
+**Classification**:
+What is being listed, expressed as a cascade of three choices: Category (Residenziale,
+Negozio, Ufficio), then Group, then Property type. Each level decides the options of the one
+below it, and changing a level clears the levels beneath. The Classification affects nothing
+outside its own Section.
+_Avoid_: Taxonomy, kind, typology (on its own)
 
 **Contract type**:
-Whether the Listing is a sale or a rental. It decides which price Fields the chosen Contract
-and price Section shows. An office can only be sold.
+Whether the Listing is a sale or a rental. It decides which Section appears beneath the
+Contract Section: Price for a sale, Rent terms for a rental. It is independent of the
+Classification.
 _Avoid_: Mode, contract, transaction
 
 **Draft**:

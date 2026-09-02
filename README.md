@@ -35,11 +35,12 @@ src/
       schema.es.ts              every Spanish rule, in full — a duplicate on purpose
       FeaturesStep.tsx          which sections appear, and when
       sections/
-        MainDetails.tsx
+        MainDetails.tsx         the Categoria -> Gruppo -> Tipologia cascade
+        propertyClassification.ts   the option lists that cascade feeds on
         AddressIT.tsx  AddressES.tsx
-        ContractAndPriceApartment.tsx
-        ContractAndPriceVilla.tsx
-        ContractAndPriceOffice.tsx
+        Contract.tsx            contract type + the owner's tax id
+        SalePrice.tsx           only for a sale
+        RentTerms.tsx           only for a rental
         LandRegistry.tsx        Italy only
         OwnerTaxId.tsx          CodiceFiscaleField / NifField
     publication/                schema.ts + PublicationStep.tsx
@@ -63,23 +64,24 @@ the Draft, because the two markets' fields do not coincide.
    appear in the order the fields appear on screen, and clicking one moves focus to its field.
    Labels and order come from the schema's own `.label()` calls, read back with `describe()`,
    so there is no second list of fields to keep in step.
-2. **A different section per property type** — choose `Appartamento`: you get
-   `ContractAndPriceApartment`, sale or rent. Choose `Villa`: `ContractAndPriceVilla`, where
-   the recurring costs are maintenance rather than service charges. Choose `Ufficio`:
-   `ContractAndPriceOffice`, where `Affitto` is not in the select at all and a business
-   licence number is required. The component name tells you which one is on screen.
-3. **A stale choice is cleared** — pick `Appartamento` + `Affitto`, fill in the rent, then
-   switch to `Ufficio`. The contract type resets, because an office cannot be rented, and the
-   rent you typed never reaches the payload.
-4. **Blocked forward navigation** — complete *Features*, move on, then come back using the
+2. **A different section per contract type** — choose `Vendita` and a **Prezzo** section
+   appears; choose `Affitto` and you get **Canone e condizioni** instead. Two components,
+   `SalePrice` and `RentTerms`, and the name tells you which one is on screen.
+3. **The classification cascade** — Categoria `Negozio` offers the groups *Locali
+   commerciali* and *Ristorazione*; picking *Locali commerciali* offers the types *Locale
+   commerciale* and *Laboratorio*. Changing the category clears the two levels below it.
+   The cascade affects nothing outside its own section.
+4. **Leftovers never reach the payload** — fill in a rent, then switch to `Vendita`. The rent
+   figures stay in form state but are stripped when the payload is built.
+5. **Blocked forward navigation** — complete *Features*, move on, then come back using the
    stepper. Empty a required field and try to move forward again from the stepper: you are
    blocked with the summary. Moving backwards is never blocked, and keeps what you typed.
-5. **Same field, different format** — postal code `99999` is valid in IT and rejected in ES,
+6. **Same field, different format** — postal code `99999` is valid in IT and rejected in ES,
    where the first two digits must identify a province (01-52).
-6. **Different fields** — *Codice fiscale* in IT, *NIF* in ES.
-7. **Different sections** — *Features* has a *Dati catastali* section in IT that does not
+7. **Different fields** — *Codice fiscale* in IT, *NIF* in ES.
+8. **Different sections** — *Features* has a *Dati catastali* section in IT that does not
    exist in ES.
-8. **Payload** — at the end the object that would be sent to the backend is displayed.
+9. **Payload** — at the end the object that would be sent to the backend is displayed.
 
 ## Two places where the code departs from the obvious route
 
@@ -93,8 +95,11 @@ Spreading the Draft directly would emit numbers as strings and keep the leftover
 
 ## Known limitations, all deliberate
 
-- Adding a market or a property type means editing each copy, and nothing will fail the build
-  if one is missed. That is the accepted cost of ADR 0008.
+- Adding a market means editing each schema copy, and nothing will fail the build if one is
+  missed. That is the accepted cost of ADR 0008.
+- The classification cascade is data in `propertyClassification.ts`, shared by both markets
+  because nothing says they differ. If one day they do, that file gets duplicated per tenant
+  the way the schemas already are.
 - Validation covers **only the current Step**, never the whole Draft. See
   [ADR 0006](./docs/adr/0006-validation-scoped-to-current-step.md).
 - The browser's own back and forward buttons bypass the guarded navigation: they neither
@@ -102,7 +107,5 @@ Spreading the Draft directly would emit numbers as strings and keep the leftover
 - No persistence: refreshing on a later Step returns to the first one.
 - Simulated uploads: `File` objects stay in memory, no network call, and no validation at all
   on the file fields.
-- "An office cannot be rented" is an example rule chosen to exercise the behaviour, not a
-  claim about the real market.
 - The `codiceFiscale` and `nif` regexes check shape, not checksums. Both keep their legal
   names rather than being translated: they are proper nouns of the domain, like IBAN.
