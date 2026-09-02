@@ -45,10 +45,23 @@ path so that an Error summary can refer to it.
 _Avoid_: Input, control
 
 **Discriminant**:
-A Field whose value determines which other Fields of the same Section exist and are required
+A Field whose value determines which other Fields of its own Section exist and are required
 (e.g. Contract type). Not every conditioning Field is a Discriminant: it is one only when its
 admissible values form a closed set and each one selects a different set of Fields.
 _Avoid_: Trigger, pilot field, switch
+
+**Dependency**:
+The same relationship reaching across Sections: a Field in one Section determines which Fields
+exist in another Section of the same Step (choosing an office reveals the business licence in
+Contract and price). Distinct from a Discriminant because the governing Field is not the
+governed Section's to render or clear.
+_Avoid_: Cross-field rule, link, reference
+
+**Option constraint**:
+A restriction on which of a Field's admissible values remain selectable, given the value of
+another Field (an office cannot be offered for rent). It narrows a Field's choices; it does
+not decide whether the Field exists.
+_Avoid_: Filter, rule, allowed values
 
 **Contract type**:
 The Discriminant governing the price Fields. Each of its values (sale, rent, ...) selects a
@@ -57,8 +70,8 @@ _Avoid_: Mode, contract, category
 
 **Draft**:
 The partial Listing accumulated as the user moves through the Steps. It holds only values
-consistent with the user's current choices: when a Discriminant changes, the Fields of the
-abandoned set leave the Draft.
+consistent with the user's current choices: when a governing Field changes, the Fields of the
+abandoned set leave the Draft. It records which Steps have been visited, not which are valid.
 _Avoid_: Registry, state, payload, bozza
 
 **Error summary**:

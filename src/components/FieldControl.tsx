@@ -1,42 +1,26 @@
 import { useField, useFormikContext } from 'formik';
 import type { FieldDescriptor, ResolvedSection, StepValues } from '../domain/types';
 import { fieldId } from '../wizard/errors';
-import { applyDiscriminantChange, pruneTouched } from '../wizard/values';
+import { availableOptions } from '../wizard/schema';
 
 interface Props {
   section: ResolvedSection;
   field: FieldDescriptor;
 }
 
+/**
+ * Note what is NOT here: no special handling for the Discriminant. Changing it is an
+ * ordinary `setValue`; dropping the abandoned branch's values is the normalisation
+ * pass's job (ADR 0007). That is what keeps this component from growing a handler
+ * per relationship as the descriptors gain more of them.
+ */
 export function FieldControl({ section, field }: Props) {
   const path = `${section.id}.${field.name}`;
   const [formikField, meta, helpers] = useField(path);
-  const formik = useFormikContext<StepValues>();
+  const { values } = useFormikContext<StepValues>();
   const id = fieldId(section.id, field.name);
   const showError = Boolean(meta.touched && meta.error);
-  const isDiscriminant = section.shape.discriminant?.field.name === field.name;
-
-  /**
-   * Changing the Discriminant is not an ordinary onChange: it rebuilds the Section,
-   * clearing the abandoned branch's values and touched state together. See ADR 0003.
-   */
-  const onDiscriminantChange = (value: string) => {
-    formik.setValues({
-      ...formik.values,
-      [section.id]: applyDiscriminantChange(section.shape, formik.values[section.id] ?? {}, value),
-    });
-    formik.setTouched(
-      {
-        ...formik.touched,
-        [section.id]: pruneTouched(
-          section.shape,
-          formik.touched[section.id] as Record<string, boolean> | undefined,
-          value,
-        ),
-      },
-      false,
-    );
-  };
+  const options = availableOptions(field, values);
 
   const common = {
     id,
@@ -51,15 +35,9 @@ export function FieldControl({ section, field }: Props) {
       <label htmlFor={id}>{field.label}</label>
 
       {field.kind === 'select' && (
-        <select
-          {...common}
-          value={(formikField.value as string) ?? ''}
-          onChange={(e) =>
-            isDiscriminant ? onDiscriminantChange(e.target.value) : helpers.setValue(e.target.value)
-          }
-        >
+        <select {...common} value={(formikField.value as string) ?? ''} onChange={(e) => helpers.setValue(e.target.value)}>
           <option value="">— seleziona —</option>
-          {field.options?.map((o) => (
+          {options.map((o) => (
             <option key={o.value} value={o.value}>
               {o.label}
             </option>
@@ -69,7 +47,7 @@ export function FieldControl({ section, field }: Props) {
 
       {field.kind === 'radio' && (
         <div role="radiogroup" aria-labelledby={id}>
-          {field.options?.map((o, i) => (
+          {options.map((o, i) => (
             <label key={o.value} className="radio">
               <input
                 type="radio"
@@ -78,9 +56,7 @@ export function FieldControl({ section, field }: Props) {
                 value={o.value}
                 checked={formikField.value === o.value}
                 onBlur={formikField.onBlur}
-                onChange={() =>
-                  isDiscriminant ? onDiscriminantChange(o.value) : helpers.setValue(o.value)
-                }
+                onChange={() => helpers.setValue(o.value)}
               />
               {o.label}
             </label>
@@ -94,12 +70,7 @@ export function FieldControl({ section, field }: Props) {
 
       {field.kind === 'files' && (
         <>
-          <input
-            {...common}
-            type="file"
-            multiple
-            onChange={(e) => helpers.setValue(Array.from(e.target.files ?? []))}
-          />
+          <input {...common} type="file" multiple onChange={(e) => helpers.setValue(Array.from(e.target.files ?? []))} />
           <FileList value={formikField.value as File[] | undefined} />
         </>
       )}

@@ -9,12 +9,7 @@ export const floorPlans: SectionDescriptor = {
   title: 'Planimetrie e documenti',
   byTenant: sameForAllTenants({
     fields: [
-      files(
-        'floorPlan',
-        'Planimetria',
-        Yup.array().of(Yup.mixed<File>().required()).max(5, 'Puoi caricare al massimo 5 planimetrie'),
-        { help: 'Facoltativa.' },
-      ),
+      files('floorPlan', 'Planimetria', Yup.array().of(Yup.mixed<File>())),
       textarea('notes', 'Note per la redazione', stringSchema().max(300, 'Massimo 300 caratteri')),
     ],
   }),

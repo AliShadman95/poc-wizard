@@ -27,7 +27,7 @@ export function collectErrors(
   for (const section of sections) {
     const sectionErrors = errors[section.id] as Record<string, string> | undefined;
     if (!sectionErrors) continue;
-    for (const field of activeFields(section.shape, values[section.id])) {
+    for (const field of activeFields(section, values)) {
       const message = sectionErrors[field.name];
       if (typeof message !== 'string') continue;
       entries.push({

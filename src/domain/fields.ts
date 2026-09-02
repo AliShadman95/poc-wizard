@@ -2,7 +2,7 @@ import * as Yup from 'yup';
 import type { FieldDescriptor, Option, SectionShape, Tenant } from './types';
 import { TENANTS } from './types';
 
-type Extra = Partial<Pick<FieldDescriptor, 'help' | 'options'>>;
+type Extra = Partial<Pick<FieldDescriptor, 'help' | 'options' | 'constrainedBy'>>;
 
 export const text = (name: string, label: string, schema: Yup.Schema, extra: Extra = {}): FieldDescriptor => ({
   name, label, kind: 'text', schema, ...extra,

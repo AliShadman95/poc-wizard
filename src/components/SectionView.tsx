@@ -5,7 +5,7 @@ import { FieldControl } from './FieldControl';
 
 export function SectionView({ section }: { section: ResolvedSection }) {
   const { values } = useFormikContext<StepValues>();
-  const fields = activeFields(section.shape, values[section.id]);
+  const fields = activeFields(section, values);
 
   return (
     <fieldset className="section">

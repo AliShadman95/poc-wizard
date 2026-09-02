@@ -67,67 +67,41 @@ function StepRoute({ tenant, draft, setDraft, published, setPublished }: StepRou
   const previous = steps[step.index - 1];
   if (previous && !draft[previous.id]) return <Navigate to={pathForStep(steps[0].id)} replace />;
 
-  const isLast = step.index === steps.length - 1;
-
-  const onConfirm = (values: StepValues) => {
-    const updated: Draft = { ...draft, [step.id]: values };
-    setDraft(updated);
-    if (isLast) {
-      setPublished(serialize(buildPayload(tenant, updated)));
-    } else {
-      navigate(pathForStep(steps[step.index + 1].id));
-    }
+  /**
+   * Committing on the way out — forwards or backwards — is what makes the Draft hold
+   * what the user last typed. It therefore records what has been VISITED, not what is
+   * valid: validity is re-established on every forward move. See ADR 0006.
+   */
+  const onGo = (values: StepValues, target: StepId) => {
+    setDraft({ ...draft, [step.id]: values });
+    navigate(pathForStep(target));
   };
 
-  return (
-    <>
-      <StepNav steps={steps} current={step.id} draft={draft} />
-      {published ? (
-        <section>
-          <h2>Annuncio inviato</h2>
-          <p>Payload che sarebbe stato spedito al backend:</p>
-          <pre>{published}</pre>
-        </section>
-      ) : (
-        <StepForm
-          tenant={tenant}
-          step={step}
-          saved={draft[step.id]}
-          isLast={isLast}
-          onConfirm={onConfirm}
-          onBack={previous ? () => navigate(pathForStep(previous.id)) : null}
-        />
-      )}
-    </>
-  );
-}
+  const onPublish = (values: StepValues) => {
+    const updated: Draft = { ...draft, [step.id]: values };
+    setDraft(updated);
+    setPublished(serialize(buildPayload(tenant, updated)));
+  };
 
-function StepNav({
-  steps,
-  current,
-  draft,
-}: {
-  steps: ReturnType<typeof wizardFor>;
-  current: StepId;
-  draft: Draft;
-}) {
-  const navigate = useNavigate();
+  if (published) {
+    return (
+      <section>
+        <h2>Annuncio inviato</h2>
+        <p>Payload che sarebbe stato spedito al backend:</p>
+        <pre>{published}</pre>
+      </section>
+    );
+  }
+
   return (
-    <nav className="steps">
-      {steps.map((s, i) => {
-        const reachable = i === 0 || Boolean(draft[steps[i - 1].id]);
-        return (
-          <button
-            key={s.id}
-            type="button"
-            disabled={!reachable}
-            aria-current={s.id === current ? 'step' : undefined}
-            onClick={() => navigate(pathForStep(s.id))}
-          >
-            {i + 1}. {s.title}
-          </button>
-        );
-      })}
-    </nav>
+    <StepForm
+      tenant={tenant}
+      step={step}
+      steps={steps}
+      draft={draft}
+      saved={draft[step.id]}
+      onGo={onGo}
+      onPublish={onPublish}
+    />
   );
 }

@@ -1,11 +1,36 @@
 import { num, select, text } from '../domain/fields';
 import { numberSchema, REQUIRED, stringSchema } from '../domain/rules';
-import type { ContractType, Discriminant, FieldDescriptor, SectionDescriptor } from '../domain/types';
+import type {
+  ContractType,
+  Dependency,
+  Discriminant,
+  FieldDescriptor,
+  FieldRef,
+  PropertyType,
+  SectionDescriptor,
+} from '../domain/types';
 
 /**
- * This Section is the heart of the PoC: a Discriminant and a per-Tenant variation
- * live together here, which is where the two mechanisms could interfere.
+ * This Section is the heart of the PoC. Three mechanisms meet here, which is where
+ * they could interfere with one another:
+ *   - a Discriminant of its own (contract type drives which price Fields exist);
+ *   - a Dependency on another Section (property type reveals a Field here);
+ *   - an option constraint from that same other Section (an office cannot be rented).
  */
+
+/** The controlling Field lives in Main details, a different Section of the same Step. */
+const PROPERTY_TYPE: FieldRef = { section: 'mainDetails', name: 'propertyType' };
+
+/**
+ * TOTAL map over PropertyType: adding a property type breaks compilation here until
+ * its allowed contract types are stated. Without this, a new type would silently
+ * inherit "everything is allowed".
+ */
+const allowedContractTypes: Record<PropertyType, ContractType[]> = {
+  apartment: ['sale', 'rent'],
+  house: ['sale', 'rent'],
+  office: ['sale'],
+};
 
 const contractType = select(
   'contractType',
@@ -15,6 +40,7 @@ const contractType = select(
     { value: 'rent', label: 'Affitto' },
   ],
   stringSchema().required(REQUIRED),
+  { constrainedBy: { on: PROPERTY_TYPE, allowed: allowedContractTypes } },
 );
 
 /**
@@ -35,6 +61,26 @@ const branches: Record<ContractType, FieldDescriptor[]> = {
 };
 
 const discriminant: Discriminant<string> = { field: contractType, branches };
+
+/**
+ * Cross-Section dependency: choosing "office" in Main details reveals a Field here.
+ * Also a TOTAL map over PropertyType, for the same reason as above.
+ */
+const byPropertyType: Dependency<string> = {
+  on: PROPERTY_TYPE,
+  branches: {
+    apartment: [],
+    house: [],
+    office: [
+      text(
+        'businessLicence',
+        'Numero di licenza commerciale',
+        stringSchema().matches(/^[A-Za-z0-9/-]{4,20}$/, 'Da 4 a 20 caratteri alfanumerici').required(REQUIRED),
+        { help: 'Richiesto solo per gli uffici.' },
+      ),
+    ],
+  } satisfies Record<PropertyType, FieldDescriptor[]>,
+};
 
 /**
  * TYPE B variation: not the same Field with a different format, but genuinely
@@ -67,7 +113,7 @@ export const contractAndPrice: SectionDescriptor = {
   step: 'features',
   title: 'Contratto e prezzo',
   byTenant: {
-    IT: { discriminant, fields: [codiceFiscale] },
-    ES: { discriminant, fields: [nif] },
+    IT: { discriminant, dependencies: [byPropertyType], fields: [codiceFiscale] },
+    ES: { discriminant, dependencies: [byPropertyType], fields: [nif] },
   },
 };
