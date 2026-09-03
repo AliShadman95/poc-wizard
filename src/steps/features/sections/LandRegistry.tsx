@@ -1,6 +1,6 @@
 import { Section, TextInput } from '../../../ui/inputs';
 
-/** Esiste solo in Italia. In Spagna questa sezione non viene proprio renderizzata. */
+/** Italy only. In Spain this section is not rendered at all. */
 export function LandRegistry() {
   return (
     <Section title="Dati catastali">

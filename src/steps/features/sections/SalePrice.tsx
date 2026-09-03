@@ -1,6 +1,6 @@
 import { NumberInput, Section } from '../../../ui/inputs';
 
-/** Compare solo per la VENDITA. */
+/** Shown for a SALE only. */
 export function SalePrice() {
   return (
     <Section title="Prezzo">

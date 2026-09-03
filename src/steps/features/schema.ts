@@ -4,14 +4,14 @@ import { featuresInitialValuesES, featuresSchemaES } from './schema.es';
 import { featuresInitialValuesIT, featuresSchemaIT } from './schema.it';
 
 /**
- * L'unico punto in cui si sceglie lo schema in base al tenant. Prima il ternario era
- * scritto in FeaturesStep e ripetuto in payload.ts: aggiungere un mercato voleva dire
- * andarli a cercare.
+ * The single place where the tenant is resolved to a schema. The ternary used to be
+ * written in FeaturesStep and repeated in payload.ts, so adding a market meant hunting
+ * for both.
  *
- * Lo `switch` senza `default` non è una formalità: con un tipo di ritorno dichiarato,
- * aggiungere un tenant alla union rende la funzione non esaustiva e TypeScript la
- * rifiuta. È il controllo a compile-time che l'ADR 0008 aveva messo in conto di
- * perdere, recuperato qui senza reintrodurre alcun descrittore.
+ * The `switch` without a `default` is not a formality: with a declared return type,
+ * adding a tenant to the union makes the function non-exhaustive and TypeScript rejects
+ * it. That is the compile-time check ADR 0008 expected to lose, recovered here without
+ * bringing back any descriptor.
  */
 export function getFeaturesSchema(tenant: Tenant): (values: StepValues) => AnyObjectSchema {
   switch (tenant) {

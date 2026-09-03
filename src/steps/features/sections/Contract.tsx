@@ -3,8 +3,8 @@ import { Section, SelectInput } from '../../../ui/inputs';
 import { CodiceFiscaleField, NifField } from './OwnerTaxId';
 
 /**
- * Il tipo di contratto decide quale sezione compare subito sotto: Prezzo per la
- * vendita, Canone e condizioni per l'affitto. Non dipende dalla categoria.
+ * The contract type decides which section appears directly below: Prezzo for a sale,
+ * Canone e condizioni for a rental. It does not depend on the classification.
  */
 export function Contract({ tenant }: { tenant: Tenant }) {
   return (

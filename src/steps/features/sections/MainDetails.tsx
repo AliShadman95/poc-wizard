@@ -4,11 +4,11 @@ import { NumberInput, Section, SelectInput } from '../../../ui/inputs';
 import { CATEGORIES, GROUPS_BY_CATEGORY, TYPES_BY_GROUP } from './propertyClassification';
 
 /**
- * Uguale nei due mercati. Le tre select in cima sono una cascata: la categoria decide
- * i gruppi, il gruppo decide le tipologie. Cambiare un livello azzera quelli sotto,
- * altrimenti resterebbe selezionata una tipologia che non appartiene più al gruppo.
+ * The same in both markets. The three selects at the top are a cascade: the category
+ * decides the groups, the group decides the types. Changing a level clears the ones below
+ * it, otherwise a type would stay selected that no longer belongs to its group.
  *
- * Questa scelta NON influenza nessun'altra sezione: il tipo di contratto è indipendente.
+ * This choice affects NO other section: the contract type is independent of it.
  */
 export function MainDetails() {
   const { values, setFieldValue } = useFormikContext<StepValues>();

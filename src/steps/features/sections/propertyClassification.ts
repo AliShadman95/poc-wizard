@@ -1,13 +1,13 @@
 /**
- * La classificazione dell'immobile: Categoria → Gruppo → Tipologia.
- * Scegliere una categoria decide i gruppi disponibili; scegliere un gruppo decide
- * le tipologie. Sono liste di opzioni per delle `<select>`, non regole di validazione:
- * gli schemi si limitano a esigere che i tre campi siano valorizzati, perché la UI
- * non può produrre una combinazione incoerente (cambiando categoria si azzerano
- * gruppo e tipologia, cambiando gruppo si azzera la tipologia).
+ * How a property is classified: Category -> Group -> Type.
+ * Choosing a category decides the available groups; choosing a group decides the types.
+ * These are option lists for `<select>` elements, not validation rules: the schemas only
+ * require the three fields to be filled in, because the UI cannot produce an incoherent
+ * combination (changing the category clears group and type, changing the group clears
+ * the type).
  *
- * Oggi la classificazione è la stessa nei due mercati. Se un domani divergesse,
- * questo file si duplica per tenant come già fatto per gli schemi.
+ * Today the classification is the same in both markets. Should it ever diverge, this file
+ * gets duplicated per tenant the way the schemas already are.
  */
 
 export const CATEGORIES = [

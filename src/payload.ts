@@ -4,10 +4,11 @@ import { multimediaSchema } from './steps/multimedia/schema';
 import { publicationSchema } from './steps/publication/schema';
 
 /**
- * L'unica funzione che produce il payload, una riga per Step. Passa dal `cast` degli
- * schemi, quindi i numeri escono numeri (nel form sono stringhe) e i campi che lo
- * schema corrente non prevede — il canone di un ufficio, i dati catastali in Spagna —
- * non ci finiscono. Fare lo spread diretto della bozza li lascerebbe passare.
+ * The only function that produces the payload, one line per Step. It goes through the
+ * schemas' `cast`, so numbers come out as numbers (in form state they are strings) and
+ * fields the current schema does not declare — the rent figures after switching to a
+ * sale, the land registry in Spain — never reach it. Spreading the draft directly would
+ * let them through.
  */
 export function buildPayload(tenant: Tenant, draft: Draft) {
   const features = getFeaturesSchema(tenant);
@@ -20,6 +21,6 @@ export function buildPayload(tenant: Tenant, draft: Draft) {
   };
 }
 
-/** I File non sono serializzabili: nella demo ne mostriamo nome e peso. */
+/** Files are not serialisable: the demo shows their name and size instead. */
 export const serialize = (payload: unknown) =>
   JSON.stringify(payload, (_k, v) => (v instanceof File ? { name: v.name, bytes: v.size } : v), 2);

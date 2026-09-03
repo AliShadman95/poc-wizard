@@ -59,14 +59,14 @@ function StepRoute({ tenant, draft, setDraft, published, setPublished }: StepRou
   if (!isStepId(stepId)) return <Navigate to="/" replace />;
 
   /**
-   * Senza persistenza, un refresh su uno Step successivo atterrerebbe su un form vuoto
-   * scollegato dai precedenti. Si torna al primo Step.
+   * With no persistence, refreshing on a later Step would land on an empty form
+   * disconnected from the preceding ones. Go back to the first Step.
    */
   const index = stepIndex(stepId);
   const previous = STEPS[index - 1];
   if (previous && !draft[previous.id]) return <Navigate to={pathForStep(STEPS[0].id)} replace />;
 
-  /** Si committa uscendo, avanti o indietro, così le modifiche non si perdono. */
+  /** Committing on the way out, forwards or backwards, is what keeps edits from being lost. */
   const onGo = (values: StepValues, target: StepId) => {
     setDraft({ ...draft, [stepId]: values });
     navigate(pathForStep(target));

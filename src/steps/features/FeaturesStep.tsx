@@ -34,9 +34,9 @@ export function FeaturesStep({ tenant, draft, onGo, onPublish }: Props) {
 }
 
 /**
- * Tutto quello che compare in questo Step, in un colpo d'occhio. L'ordine qui è anche
- * l'ordine in cui i due schema dichiarano le sezioni, ed è quindi l'ordine delle voci
- * nel riepilogo errori.
+ * Everything that can appear in this Step, at a glance. The order here is also the order
+ * in which both schemas declare their sections, and therefore the order of the entries in
+ * the error summary.
  */
 function Sections({ tenant }: { tenant: Tenant }) {
   const { values } = useFormikContext<StepValues>();

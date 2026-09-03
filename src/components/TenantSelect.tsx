@@ -1,8 +1,8 @@
 import { TENANTS, type Tenant } from '../domain';
 
 /**
- * Strumento di demo, non funzionalità di prodotto: sta fuori dal wizard e cambiare
- * tenant azzera la bozza, perché i campi dei due mercati non coincidono.
+ * A demo instrument, not a product feature: it sits outside the wizard, and changing the
+ * tenant clears the draft, because the two markets' fields do not coincide.
  */
 export function TenantSelect({ tenant, onChange }: { tenant: Tenant; onChange: (t: Tenant) => void }) {
   return (

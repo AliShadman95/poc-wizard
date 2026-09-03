@@ -3,18 +3,18 @@ import type { AnyObjectSchema } from 'yup';
 import type { ContractType, StepValues } from '../../domain';
 
 /**
- * Lo schema del mercato ITALIANO, scritto per esteso.
- * Il gemello spagnolo è in schema.es.ts: i due file sono volutamente duplicati e
- * vanno letti affiancati, così la differenza fra i mercati si vede con un diff.
+ * The ITALIAN market's schema, written out in full.
+ * Its Spanish twin is schema.es.ts: the two files are duplicates on purpose and are meant
+ * to be read side by side, so that a diff shows what differs between the markets.
  *
- * Le `.label()` non servono solo ai messaggi: il riepilogo errori legge etichette e
- * ordine da qui con `describe()`, quindi l'ordine dei campi in questo file è l'ordine
- * delle voci nel riepilogo, e va tenuto uguale a quello del JSX.
+ * The `.label()` calls are not only for messages: the error summary reads labels and order
+ * from here via `describe()`, so the order of the fields in this file is the order of the
+ * entries in the summary, and must be kept the same as the JSX.
  */
 
 const REQUIRED = 'Campo obbligatorio';
 
-/** Un input numerico vuoto arriva come stringa: senza questo scatta typeError invece di required. */
+/** An empty numeric input arrives as a string: without this, typeError fires instead of required. */
 const number = () =>
   Yup.number()
     .transform((value, original) => (original === '' || original === null ? undefined : value))
@@ -23,8 +23,8 @@ const number = () =>
 const text = () => Yup.string().trim();
 
 /**
- * Categoria, gruppo e tipologia sono una cascata gestita nella UI: qui basta esigerne
- * la presenza, perché le select non possono offrire una combinazione incoerente.
+ * Category, group and type are a cascade handled in the UI, so all that is required here
+ * is that they are present: the selects cannot offer an incoherent combination.
  */
 const mainDetails = () =>
   Yup.object({
@@ -36,7 +36,7 @@ const mainDetails = () =>
     bathrooms: number().integer('Deve essere un numero intero').min(1, 'Almeno 1').required(REQUIRED).label('Numero di bagni'),
   }).label('Dati principali');
 
-/** In Italia il CAP è cinque cifre qualsiasi. In Spagna no: vedi schema.es.ts. */
+/** In Italy the CAP is any five digits. In Spain it is not: see schema.es.ts. */
 const address = () =>
   Yup.object({
     street: text().required(REQUIRED).label('Via'),
@@ -54,14 +54,14 @@ const contract = () =>
       .label('Codice fiscale del proprietario'),
   }).label('Contratto');
 
-/** Solo per la vendita. */
+/** Sale only. */
 const price = () =>
   Yup.object({
     salePrice: number().positive('Deve essere maggiore di zero').required(REQUIRED).label('Prezzo di vendita (€)'),
     notaryFees: number().min(0, 'Non può essere negativo').label('Spese notarili stimate (€)'),
   }).label('Prezzo');
 
-/** Solo per l'affitto. */
+/** Rental only. */
 const rentTerms = () =>
   Yup.object({
     monthlyRent: number().positive('Deve essere maggiore di zero').required(REQUIRED).label('Canone mensile (€)'),
@@ -69,7 +69,7 @@ const rentTerms = () =>
     depositMonths: number().integer('Deve essere un numero intero').min(0, 'Non può essere negativo').required(REQUIRED).label('Mesi di cauzione'),
   }).label('Canone e condizioni');
 
-/** Sezione che esiste solo in Italia. */
+/** A section that exists in Italy only. */
 const landRegistry = () =>
   Yup.object({
     sheet: text().matches(/^\d{1,4}$/, 'Da 1 a 4 cifre').required(REQUIRED).label('Foglio'),
@@ -77,7 +77,7 @@ const landRegistry = () =>
     subUnit: text().matches(/^\d{0,4}$/, 'Da 1 a 4 cifre').label('Subalterno'),
   }).label('Dati catastali');
 
-/** Le sezioni sono aggiunte nello stesso ordine in cui FeaturesStep le renderizza. */
+/** Sections are added in the same order in which FeaturesStep renders them. */
 export function featuresSchemaIT(values: StepValues): AnyObjectSchema {
   const contractType = (values.contract?.contractType ?? '') as ContractType | '';
 

@@ -1,6 +1,6 @@
 import { NumberInput, Section } from '../../../ui/inputs';
 
-/** Compare solo per l'AFFITTO. */
+/** Shown for a RENTAL only. */
 export function RentTerms() {
   return (
     <Section title="Canone e condizioni">

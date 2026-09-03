@@ -3,16 +3,16 @@ import type { AnyObjectSchema } from 'yup';
 import type { ContractType, StepValues } from '../../domain';
 
 /**
- * Lo schema del mercato SPAGNOLO, scritto per esteso.
- * Gemello duplicato di schema.it.ts. Le differenze reali, leggibili con un diff:
- *   - il código postal ha le prime due cifre fra 01 e 52 (la provincia), il CAP no;
- *   - l'identificativo fiscale è il NIF e non il codice fiscale;
- *   - non esiste la sezione Dati catastali.
+ * The SPANISH market's schema, written out in full.
+ * A deliberate duplicate of schema.it.ts. The real differences, visible in a diff:
+ *   - the código postal's first two digits run from 01 to 52 (the province), the CAP's do not;
+ *   - the tax identifier is the NIF, not the codice fiscale;
+ *   - there is no Dati catastali section.
  */
 
 const REQUIRED = 'Campo obbligatorio';
 
-/** Un input numerico vuoto arriva come stringa: senza questo scatta typeError invece di required. */
+/** An empty numeric input arrives as a string: without this, typeError fires instead of required. */
 const number = () =>
   Yup.number()
     .transform((value, original) => (original === '' || original === null ? undefined : value))
@@ -21,8 +21,8 @@ const number = () =>
 const text = () => Yup.string().trim();
 
 /**
- * Categoria, gruppo e tipologia sono una cascata gestita nella UI: qui basta esigerne
- * la presenza, perché le select non possono offrire una combinazione incoerente.
+ * Category, group and type are a cascade handled in the UI, so all that is required here
+ * is that they are present: the selects cannot offer an incoherent combination.
  */
 const mainDetails = () =>
   Yup.object({
@@ -34,7 +34,7 @@ const mainDetails = () =>
     bathrooms: number().integer('Deve essere un numero intero').min(1, 'Almeno 1').required(REQUIRED).label('Numero di bagni'),
   }).label('Dati principali');
 
-/** Le prime due cifre del código postal indicano la provincia: da 01 a 52. */
+/** The first two digits of the código postal identify the province: 01 to 52. */
 const address = () =>
   Yup.object({
     street: text().required(REQUIRED).label('Calle'),
@@ -55,14 +55,14 @@ const contract = () =>
       .label('NIF del proprietario'),
   }).label('Contratto');
 
-/** Solo per la vendita. */
+/** Sale only. */
 const price = () =>
   Yup.object({
     salePrice: number().positive('Deve essere maggiore di zero').required(REQUIRED).label('Prezzo di vendita (€)'),
     notaryFees: number().min(0, 'Non può essere negativo').label('Spese notarili stimate (€)'),
   }).label('Prezzo');
 
-/** Solo per l'affitto. */
+/** Rental only. */
 const rentTerms = () =>
   Yup.object({
     monthlyRent: number().positive('Deve essere maggiore di zero').required(REQUIRED).label('Canone mensile (€)'),
@@ -70,7 +70,7 @@ const rentTerms = () =>
     depositMonths: number().integer('Deve essere un numero intero').min(0, 'Non può essere negativo').required(REQUIRED).label('Mesi di cauzione'),
   }).label('Canone e condizioni');
 
-/** Nessuna sezione Dati catastali: è la differenza di forma rispetto all'Italia. */
+/** No Dati catastali section: that is the difference in shape from Italy. */
 export function featuresSchemaES(values: StepValues): AnyObjectSchema {
   const contractType = (values.contract?.contractType ?? '') as ContractType | '';
 

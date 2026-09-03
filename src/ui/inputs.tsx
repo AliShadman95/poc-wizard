@@ -66,9 +66,9 @@ export function TextareaInput(props: Base) {
 }
 
 /**
- * `onValueChange` esiste per un caso solo: una select che ne azzera un'altra a valle,
- * come Categoria → Gruppo → Tipologia. Il reset resta scritto nella sezione che lo
- * riguarda, non qui dentro.
+ * `onValueChange` exists for one case only: a select that clears another one downstream,
+ * as in Categoria -> Gruppo -> Tipologia. The reset itself stays written in the section
+ * it concerns, not in here.
  */
 export function SelectInput(
   props: Base & { options: { value: string; label: string }[]; onValueChange?: (value: string) => void },
