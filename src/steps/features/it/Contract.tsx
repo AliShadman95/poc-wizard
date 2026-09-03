@@ -8,7 +8,7 @@ import { Section, SelectInput, TextInput } from '../../../ui/inputs';
  * different name, different label, different shape — so each market has its own version
  * of this section rather than one component branching on the tenant.
  */
-export function ContractIT() {
+export function Contract() {
   return (
     <Section title="Contratto">
       <SelectInput

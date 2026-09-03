@@ -1,6 +1,6 @@
 import { Section, TextInput } from '../../../ui/inputs';
 
-export function AddressIT() {
+export function Address() {
   return (
     <Section title="Indirizzo">
       <TextInput section="address" name="street" label="Via" />

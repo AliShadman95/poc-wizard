@@ -1,7 +1,7 @@
 import { Section, SelectInput, TextInput } from '../../../ui/inputs';
 
-/** The Spanish twin of ContractIT. The tax identifier is the NIF, not the codice fiscale. */
-export function ContractES() {
+/** The Spanish twin of it/Contract. The tax identifier is the NIF, not the codice fiscale. */
+export function Contract() {
   return (
     <Section title="Contratto">
       <SelectInput

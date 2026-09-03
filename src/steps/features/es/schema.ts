@@ -1,10 +1,10 @@
 import * as Yup from 'yup';
 import type { AnyObjectSchema } from 'yup';
-import type { ContractType, StepValues } from '../../domain';
+import type { ContractType, StepValues } from '../../../domain';
 
 /**
  * The SPANISH market's schema, written out in full.
- * A deliberate duplicate of schema.it.ts. The real differences, visible in a diff:
+ * A deliberate duplicate of ../it/schema.ts. The real differences, visible in a diff:
  *   - the código postal's first two digits run from 01 to 52 (the province), the CAP's do not;
  *   - the tax identifier is the NIF, not the codice fiscale;
  *   - there is no Dati catastali section.
@@ -71,7 +71,7 @@ const rentTerms = () =>
   }).label('Canone e condizioni');
 
 /** No Dati catastali section: that is the difference in shape from Italy. */
-export function featuresSchemaES(values: StepValues): AnyObjectSchema {
+export function featuresSchema(values: StepValues): AnyObjectSchema {
   const contractType = (values.contract?.contractType ?? '') as ContractType | '';
 
   const shape: Record<string, AnyObjectSchema> = {
@@ -85,7 +85,7 @@ export function featuresSchemaES(values: StepValues): AnyObjectSchema {
   return Yup.object(shape);
 }
 
-export const featuresInitialValuesES: StepValues = {
+export const featuresInitialValues: StepValues = {
   mainDetails: { category: '', group: '', propertyType: '', areaSqm: '', rooms: '', bathrooms: '' },
   address: { street: '', streetNumber: '', city: '', postalCode: '' },
   contract: { contractType: '', nif: '' },

@@ -10,8 +10,8 @@ interface Props {
 }
 
 /**
- * The market is resolved once, here. Which sections appear for it is in SectionsIT or
- * SectionsES; nothing further down takes a `tenant`.
+ * The market is resolved once, here. Which sections appear for it is in it/Sections.tsx or
+ * es/Sections.tsx; nothing further down takes a `tenant`.
  */
 export function FeaturesStep({ tenant, draft, onGo, onPublish }: Props) {
   return (

@@ -1,10 +1,10 @@
 import * as Yup from 'yup';
 import type { AnyObjectSchema } from 'yup';
-import type { ContractType, StepValues } from '../../domain';
+import type { ContractType, StepValues } from '../../../domain';
 
 /**
  * The ITALIAN market's schema, written out in full.
- * Its Spanish twin is schema.es.ts: the two files are duplicates on purpose and are meant
+ * Its Spanish twin is ../es/schema.ts: the two files are duplicates on purpose and are meant
  * to be read side by side, so that a diff shows what differs between the markets.
  *
  * The `.label()` calls are not only for messages: the error summary reads labels and order
@@ -36,7 +36,7 @@ const mainDetails = () =>
     bathrooms: number().integer('Deve essere un numero intero').min(1, 'Almeno 1').required(REQUIRED).label('Numero di bagni'),
   }).label('Dati principali');
 
-/** In Italy the CAP is any five digits. In Spain it is not: see schema.es.ts. */
+/** In Italy the CAP is any five digits. In Spain it is not: see ../es/schema.ts. */
 const address = () =>
   Yup.object({
     street: text().required(REQUIRED).label('Via'),
@@ -78,7 +78,7 @@ const landRegistry = () =>
   }).label('Dati catastali');
 
 /** Sections are added in the same order in which FeaturesStep renders them. */
-export function featuresSchemaIT(values: StepValues): AnyObjectSchema {
+export function featuresSchema(values: StepValues): AnyObjectSchema {
   const contractType = (values.contract?.contractType ?? '') as ContractType | '';
 
   const shape: Record<string, AnyObjectSchema> = {
@@ -93,7 +93,7 @@ export function featuresSchemaIT(values: StepValues): AnyObjectSchema {
   return Yup.object(shape);
 }
 
-export const featuresInitialValuesIT: StepValues = {
+export const featuresInitialValues: StepValues = {
   mainDetails: { category: '', group: '', propertyType: '', areaSqm: '', rooms: '', bathrooms: '' },
   address: { street: '', streetNumber: '', city: '', postalCode: '' },
   contract: { contractType: '', codiceFiscale: '' },

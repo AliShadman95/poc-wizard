@@ -1,14 +1,13 @@
 import type { ReactElement } from 'react';
 import type { AnyObjectSchema } from 'yup';
 import type { StepValues, Tenant } from '../../domain';
-import { SectionsES } from './SectionsES';
-import { SectionsIT } from './SectionsIT';
-import { featuresInitialValuesES, featuresSchemaES } from './schema.es';
-import { featuresInitialValuesIT, featuresSchemaIT } from './schema.it';
+import * as ES from './es';
+import * as IT from './it';
 
 /**
  * Every choice made on the tenant axis for this Step, gathered in one file. Adding a
- * market means opening this one and letting the compiler list what is missing.
+ * market means copying a market folder and then letting the compiler list what is missing
+ * here.
  *
  * None of these switches has a `default`, and each declares its return type. That makes
  * them exhaustive: adding a tenant to the union stops the build here, three times, until
@@ -20,26 +19,26 @@ import { featuresInitialValuesIT, featuresSchemaIT } from './schema.it';
 export function getFeaturesSchema(tenant: Tenant): (values: StepValues) => AnyObjectSchema {
   switch (tenant) {
     case 'IT':
-      return featuresSchemaIT;
+      return IT.featuresSchema;
     case 'ES':
-      return featuresSchemaES;
+      return ES.featuresSchema;
   }
 }
 
 export function getFeaturesInitialValues(tenant: Tenant): StepValues {
   switch (tenant) {
     case 'IT':
-      return featuresInitialValuesIT;
+      return IT.featuresInitialValues;
     case 'ES':
-      return featuresInitialValuesES;
+      return ES.featuresInitialValues;
   }
 }
 
 export function getFeaturesSections(tenant: Tenant): ReactElement {
   switch (tenant) {
     case 'IT':
-      return <SectionsIT />;
+      return <IT.Sections />;
     case 'ES':
-      return <SectionsES />;
+      return <ES.Sections />;
   }
 }

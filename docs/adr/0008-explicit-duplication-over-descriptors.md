@@ -24,9 +24,11 @@ than the duplication it removed.
   `steps/features/byTenant.tsx`. Adding a tenant to the union breaks the build there three
   times — verified — pointing at the one file that has to choose. It catches "you forgot to
   wire the new market up", not "you forgot a field in it".
-- A market's layout is a file of its own, `SectionsIT` / `SectionsES`, rather than one list
-  with ternaries in it. That is what keeps `tenant` from being a prop: it is resolved once at
-  the top, and no component below `FeaturesStep` takes one.
+- A market is a folder — `it/`, `es/` — holding its own schema, its own section list and the
+  sections only it uses, with no suffix on any filename because the path already says which
+  market it is. That is what keeps `tenant` from being a prop: it is resolved once at the top,
+  and no component below `FeaturesStep` takes one. `shared/` holds what is identical so far;
+  a section that diverges moves into the folder that needed it to change.
 - Reading `FeaturesStep.tsx` shows every section that can appear and the condition for
   each; reading `schema.it.ts` shows every rule for Italy. The two files are meant to be
   kept in the same order, since the error summary follows the schema.

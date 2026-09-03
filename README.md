@@ -31,29 +31,34 @@ src/
   steps/
     multimedia/                 schema.ts + MultimediaStep.tsx
     features/
-      byTenant.tsx              every choice made on the tenant axis, in one file
-      schema.it.ts              every Italian rule, in full
-      schema.es.ts              every Spanish rule, in full — a duplicate on purpose
-      SectionsIT.tsx            every section Italy shows, in order
-      SectionsES.tsx            every section Spain shows — a duplicate on purpose
       FeaturesStep.tsx          resolves the market, and nothing else
-      sections/
+      byTenant.tsx              every choice made on the tenant axis, in one file
+      it/                       one folder per market; no file inside carries a suffix,
+        schema.ts               because the path already says which market it is
+        Sections.tsx            every section Italy shows, in order
+        Address.tsx
+        Contract.tsx            contract type + the owner's tax id
+        LandRegistry.tsx        Italy only, and it lives where that is visible
+        index.ts                the surface every market folder exposes
+      es/                       the same shape, deliberately
+        schema.ts  Sections.tsx  Address.tsx  Contract.tsx  index.ts
+      shared/                   identical in both markets — so far
         MainDetails.tsx         the Categoria -> Gruppo -> Tipologia cascade
         propertyClassification.ts   the option lists that cascade feeds on
-        AddressIT.tsx  AddressES.tsx
-        ContractIT.tsx ContractES.tsx   contract type + the owner's tax id
         SalePrice.tsx           only for a sale
         RentTerms.tsx           only for a rental
-        LandRegistry.tsx        Italy only
     publication/                schema.ts + PublicationStep.tsx
 ```
 
-Each market has two files and they answer almost every question:
-**[`SectionsIT.tsx`](./src/steps/features/SectionsIT.tsx)** shows every section Italy renders
-and in what order, **[`schema.it.ts`](./src/steps/features/schema.it.ts)** every rule it
-validates. Diffing them against their `ES` twins *is* the specification of what differs
-between the markets. Below `FeaturesStep` no component takes a `tenant`: the market is
-resolved once, in [`byTenant.tsx`](./src/steps/features/byTenant.tsx).
+Each market is a folder. **[`it/Sections.tsx`](./src/steps/features/it/Sections.tsx)** shows
+every section Italy renders and in what order, **[`it/schema.ts`](./src/steps/features/it/schema.ts)**
+every rule it validates; `es/` has the same shape. Diffing the two folders *is* the
+specification of what differs between the markets, and adding a market is copying a folder.
+Below `FeaturesStep` no component takes a `tenant`: the market is resolved once, in
+[`byTenant.tsx`](./src/steps/features/byTenant.tsx).
+
+`shared/` is not a commitment, it is "identical so far". When a section diverges, a copy moves
+into the market folder that needed it.
 
 `schema.it.ts` and `schema.es.ts` are near-identical, and that is the point. See
 [ADR 0008](./docs/adr/0008-explicit-duplication-over-descriptors.md) for what this buys
