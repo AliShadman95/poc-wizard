@@ -19,10 +19,14 @@ than the duplication it removed.
 - **What is given up, deliberately**: total maps no longer make an omission a compile
   error *inside* a schema. Adding a market means writing its schema out in full, and nothing
   checks that every field was carried over. This is the price of the change, accepted knowingly.
-- Partially recovered, at the seam: the tenant is resolved to a schema by an exhaustive
-  `switch` with a declared return type in `steps/features/schema.ts`. Adding a tenant to the
-  union therefore does break the build — verified — pointing at the one file that has to
-  choose. It catches "you forgot to wire the new market up", not "you forgot a field in it".
+- Partially recovered, at the seam: every choice made on the tenant axis — schema, initial
+  values and section list — is an exhaustive `switch` with a declared return type in
+  `steps/features/byTenant.tsx`. Adding a tenant to the union breaks the build there three
+  times — verified — pointing at the one file that has to choose. It catches "you forgot to
+  wire the new market up", not "you forgot a field in it".
+- A market's layout is a file of its own, `SectionsIT` / `SectionsES`, rather than one list
+  with ternaries in it. That is what keeps `tenant` from being a prop: it is resolved once at
+  the top, and no component below `FeaturesStep` takes one.
 - Reading `FeaturesStep.tsx` shows every section that can appear and the condition for
   each; reading `schema.it.ts` shows every rule for Italy. The two files are meant to be
   kept in the same order, since the error summary follows the schema.

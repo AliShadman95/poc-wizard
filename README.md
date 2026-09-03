@@ -31,26 +31,29 @@ src/
   steps/
     multimedia/                 schema.ts + MultimediaStep.tsx
     features/
+      byTenant.tsx              every choice made on the tenant axis, in one file
       schema.it.ts              every Italian rule, in full
       schema.es.ts              every Spanish rule, in full — a duplicate on purpose
-      schema.ts                 the one exhaustive switch from tenant to schema
-      FeaturesStep.tsx          which sections appear, and when
+      SectionsIT.tsx            every section Italy shows, in order
+      SectionsES.tsx            every section Spain shows — a duplicate on purpose
+      FeaturesStep.tsx          resolves the market, and nothing else
       sections/
         MainDetails.tsx         the Categoria -> Gruppo -> Tipologia cascade
         propertyClassification.ts   the option lists that cascade feeds on
         AddressIT.tsx  AddressES.tsx
-        Contract.tsx            contract type + the owner's tax id
+        ContractIT.tsx ContractES.tsx   contract type + the owner's tax id
         SalePrice.tsx           only for a sale
         RentTerms.tsx           only for a rental
         LandRegistry.tsx        Italy only
-        OwnerTaxId.tsx          CodiceFiscaleField / NifField
     publication/                schema.ts + PublicationStep.tsx
 ```
 
-Two files answer almost every question. **[`FeaturesStep.tsx`](./src/steps/features/FeaturesStep.tsx)**
-shows every section that can appear and the condition for each. **[`schema.it.ts`](./src/steps/features/schema.it.ts)**
-shows every rule for Italy; diffing it against `schema.es.ts` *is* the specification of what
-differs between the two markets.
+Each market has two files and they answer almost every question:
+**[`SectionsIT.tsx`](./src/steps/features/SectionsIT.tsx)** shows every section Italy renders
+and in what order, **[`schema.it.ts`](./src/steps/features/schema.it.ts)** every rule it
+validates. Diffing them against their `ES` twins *is* the specification of what differs
+between the markets. Below `FeaturesStep` no component takes a `tenant`: the market is
+resolved once, in [`byTenant.tsx`](./src/steps/features/byTenant.tsx).
 
 `schema.it.ts` and `schema.es.ts` are near-identical, and that is the point. See
 [ADR 0008](./docs/adr/0008-explicit-duplication-over-descriptors.md) for what this buys

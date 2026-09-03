@@ -1,5 +1,5 @@
 import type { Draft, Tenant } from './domain';
-import { getFeaturesSchema } from './steps/features/schema';
+import { getFeaturesSchema } from './steps/features/byTenant';
 import { multimediaSchema } from './steps/multimedia/schema';
 import { publicationSchema } from './steps/publication/schema';
 
